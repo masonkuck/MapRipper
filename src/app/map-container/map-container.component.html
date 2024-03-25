@@ -18,13 +18,17 @@
     </div>
 
     <div class="col d-flex" style="align-items: center;">
-        <div class="form-check me-2">
-            <input class="form-check-input" type="checkbox" id="roadMapVisible" checked [(ngModel)]="roadMapVisible">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="roadMapVisible" [(ngModel)]="roadMapVisible">
             <label class="form-check-label" for="roadMapVisible">Show Road Map</label>
         </div>
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="waterMapVisible" checked [(ngModel)]="waterMapVisible">
+        <div class="form-check mx-2">
+            <input class="form-check-input" type="checkbox" id="waterMapVisible" [(ngModel)]="waterMapVisible">
             <label class="form-check-label" for="waterMapVisible">Show Water Map</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="hotReload" [(ngModel)]="hotReload">
+            <label class="form-check-label" for="hotReload">Hot Reload <span title="Use with caution. Erratic map pans and zooms can cause this to break.">❔</span></label>
         </div>
     </div>
 
@@ -34,20 +38,6 @@
     </div>
 </div>
 
-<div class="row px-2 pt-1">
-    <div class="col-2 d-flex" style="align-items: center;">
-        <div class="btn-group">
-            <button class="btn btn-secondary" (click)="moveMap('up')">⬆️</button>
-            <button class="btn btn-secondary" (click)="moveMap('down')">⬇️</button>
-        </div>
-    </div>
-    <div class="col-2">
-        <div class="btn-group">
-            <button class="btn btn-secondary" (click)="moveMap('left')">⬅️</button>
-            <button class="btn btn-secondary" (click)="moveMap('right')">➡️</button>
-        </div>
-    </div>
-</div>
 
 <div class="row py-5 px-2">
     <div class="col">

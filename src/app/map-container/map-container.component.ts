@@ -1,7 +1,7 @@
 import { AfterViewInit, Component } from '@angular/core';
 import { Loader } from 'google-maps';
 import html2canvas from 'html2canvas';
-import { BehaviorSubject, debounceTime, delay, of } from "rxjs";
+import { BehaviorSubject, debounceTime, delay, distinct, distinctUntilChanged } from "rxjs";
 import * as $ from 'jquery';
 import { LayerStyles } from './models/layer-styles';
 import { Config } from 'src/Config';
@@ -13,70 +13,64 @@ import { Config } from 'src/Config';
 })
 export class MapContainerComponent implements AfterViewInit {
   private readonly apiKey = Config.API_KEY;
-
-  loading = true;
-
-  // Form values
+  private loader = new Loader(this.apiKey);
+  
   mapDetails: MapDetailsType = {
-    latitude: 42.76408410998234,
-    longitude: -86.110772,
+    latitude: 40.70782099171142,
+    longitude: -74.01146343775363,
     zoom: 13
   };
+  lastChange?: string;
   $mapDetails = new BehaviorSubject<MapDetailsType>(this.mapDetails);
-
+  
+  loading = true;
   roadMapVisible = true;
   waterMapVisible = true;
+  hotReload = false;
 
-  readonly maps = new Map<string, string>();
-  readonly roadMapId = "roadMap";
-  readonly waterMapId = "waterMap";
+  readonly mapNames = ["roadMap", "waterMap"];
+  readonly roadMapId = this.mapNames[0];
+  readonly waterMapId = this.mapNames[1];
 
-  loader = new Loader(this.apiKey);
-
-  constructor() {
-    this.maps.set("roadMap", "e0de745d56a5a829");
-    this.maps.set("waterMap", "b3ab923cefc5f068");
-  }
+  mapObjects: Map<string, google.maps.Map<HTMLElement>> = new Map<string, google.maps.Map<HTMLElement>>();
 
   ngAfterViewInit(): void {
     this.loadMaps();
-    this.$mapDetails.pipe(debounceTime(500), delay(500)).subscribe(x => {
-      console.log("Details changed", x);
-      this.loadMaps(x.lastChange);
-    });
+    this.$mapDetails
+      .pipe(debounceTime(250))
+      .subscribe( x => {
+        if (this.hotReload) this.loading = true;
+        this.resetMap(x);
+        if (this.hotReload){
+          setTimeout(() => this.capture().then(() => this.loading = false), 500);
+        }
+      });
   }
 
   async loadMaps(exclude: string | undefined = undefined) {
     this.loading = true;
-    const promises = [... this.maps].filter(x => x[0] !== exclude).map(x => this.loadMap(x[0], x[1]));
+
+    const promises = [... this.mapNames]
+      .filter(x => x !== exclude)
+      .map(x => this.loadMap(x).then(y => {
+        if (!!y) this.mapObjects.set(x, y);
+      }));
+
     await Promise.all(promises);
     setTimeout(() => this.capture().then(x => this.loading = false), 1000);
   }
 
-  moveMap(direction: 'left' | 'right' | 'up' | 'down') {
-    switch (direction) {
-      case 'left':
-        this.mapDetails.longitude -= 0.01;
-        this.mapDetails.longitude = + this.mapDetails.longitude.toFixed(6)
-        break;
-      case 'right':
-        this.mapDetails.longitude += 0.01;
-        this.mapDetails.longitude = + this.mapDetails.longitude.toFixed(6)
-        break;
-      case 'up':
-        this.mapDetails.latitude += 0.01;
-        this.mapDetails.latitude = + this.mapDetails.latitude.toFixed(6)
-        break;
-      case 'down':
-        this.mapDetails.latitude -= 0.01;
-        this.mapDetails.latitude = + this.mapDetails.latitude.toFixed(6)
-        break;
-    }
-    this.mapDetails.lastChange = undefined;
-    this.$mapDetails.next(this.mapDetails);
+  resetMap(details: MapDetailsType){
+    [...this.mapObjects]
+      .filter(x => x[0] !== this.lastChange)
+      .map(x => x[1])
+      .forEach(map => {
+        map.setCenter({lat: details.latitude, lng: details.longitude});
+        map.setZoom(details.zoom);
+      });
   }
 
-  async loadMap(mapDivId: string, mapId: string) {
+  async loadMap(mapDivId: string) {
     let mapDiv = document.getElementById(mapDivId);
     if (!mapDiv) return;
 
@@ -103,16 +97,20 @@ export class MapContainerComponent implements AfterViewInit {
 
     const map = new google.maps.Map(mapDiv, options);
     map.changed = (x) => {
-      if (x === "center") {
-        this.mapDetails.longitude = map.getCenter().lng();
-        this.mapDetails.latitude = map.getCenter().lat();
-      } else if (x === "zoom") {
-        this.mapDetails.zoom = map.getZoom();
+      const latitude = map.getCenter().lat();
+      const longitude = map.getCenter().lng();
+      const zoom = map.getZoom();
+
+      if (x === "center" && (latitude !== this.mapDetails.latitude || longitude !== this.mapDetails.longitude)) {
+        this.mapDetails.latitude = latitude;
+        this.mapDetails.longitude = longitude;
+      } else if (x === "zoom" && zoom !== this.mapDetails.zoom) {
+        this.mapDetails.zoom = zoom;
       } else {
         return;
       }
 
-      this.mapDetails.lastChange = mapDivId;
+      this.lastChange = mapDivId;
       this.$mapDetails.next(this.mapDetails);
     };
     return map;
@@ -127,8 +125,8 @@ export class MapContainerComponent implements AfterViewInit {
     const output = document.getElementById('captureOutput') as HTMLCanvasElement;
     const output2 = document.getElementById('captureOutput2') as HTMLCanvasElement;
 
-    this.sanitizeMap("roadMap");
-    this.sanitizeMap("waterMap");
+    // this.sanitizeMap("roadMap");
+    // this.sanitizeMap("waterMap");
 
     const roadMapPromise = html2canvas(document.getElementById('roadMap') as HTMLElement, { allowTaint: true, useCORS: true }).then(x => this.postProcess(output, x))
     const waterMapPromise = html2canvas(document.getElementById('waterMap') as HTMLElement, { allowTaint: true, useCORS: true }).then(x => this.postProcess(output2, x));
@@ -165,5 +163,4 @@ export type MapDetailsType = {
   latitude: number;
   longitude: number;
   zoom: number;
-  lastChange?: string;
 }
