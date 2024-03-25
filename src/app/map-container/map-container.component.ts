@@ -4,6 +4,7 @@ import html2canvas from 'html2canvas';
 import { BehaviorSubject, debounceTime, delay, of } from "rxjs";
 import * as $ from 'jquery';
 import { LayerStyles } from './models/layer-styles';
+import { Config } from 'src/Config';
 
 @Component({
   selector: 'app-map-container',
@@ -11,7 +12,7 @@ import { LayerStyles } from './models/layer-styles';
   styleUrls: ['./map-container.component.scss']
 })
 export class MapContainerComponent implements AfterViewInit {
-  private readonly apiKey = "";
+  private readonly apiKey = Config.API_KEY;
 
   loading = true;
 
