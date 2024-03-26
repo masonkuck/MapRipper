@@ -2,7 +2,6 @@ import { AfterViewInit, Component } from '@angular/core';
 import { Loader } from 'google-maps';
 import html2canvas from 'html2canvas';
 import { BehaviorSubject, debounceTime, delay, distinct, distinctUntilChanged } from "rxjs";
-import * as $ from 'jquery';
 import { LayerStyles } from './models/layer-styles';
 import { Config } from 'src/Config';
 
@@ -136,11 +135,6 @@ export class MapContainerComponent implements AfterViewInit {
       this.$mapDetails.next(this.mapDetails);
     };
     return map;
-  }
-
-  async sanitizeMap(mapDivId: string) {
-    $(`#${mapDivId}>div>.gm-style>div>div>a`).remove();
-    $(`#${mapDivId}>div>.gm-style>div:last`).remove();
   }
 
   async renderCapture() {
