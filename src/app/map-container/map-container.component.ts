@@ -1,9 +1,10 @@
 import { AfterViewInit, Component } from '@angular/core';
 import { Loader } from 'google-maps';
-import html2canvas from 'html2canvas';
+import html2canvas, { Options } from 'html2canvas';
 import { BehaviorSubject, debounceTime, delay, distinct, distinctUntilChanged } from "rxjs";
 import { LayerStyles } from './models/layer-styles';
 import { Config } from 'src/Config';
+import { color } from 'html2canvas/dist/types/css/types/color';
 
 @Component({
   selector: 'app-map-container',
@@ -23,7 +24,7 @@ export class MapContainerComponent implements AfterViewInit {
   $mapDetails = new BehaviorSubject<MapDetailsType>(this.mapDetails);
 
   loading = true;
-  hotReload = false;
+  hotReload = true;
   invert = false;
 
   readonly layerDetails: LayerDetailsType[] = [
@@ -31,8 +32,9 @@ export class MapContainerComponent implements AfterViewInit {
       divId: "roadMap",
       checkId: "roadMapVisible",
       outputId: "roadMapOutput",
+      colorId: "roadMapColor",
       name: "Road Map",
-      color: [0, 0, 0],
+      colorHex: "#000000",
       visible: true,
       styles: LayerStyles.roadsLayerStyle,
       stackOrder: 1
@@ -41,8 +43,9 @@ export class MapContainerComponent implements AfterViewInit {
       divId: "waterMap",
       checkId: "waterMapVisible",
       outputId: "waterMapOutput",
+      colorId: "waterMapColor",
       name: "Water Map",
-      color: [0, 0, 255],
+      colorHex: "#0000ff",
       visible: true,
       styles: LayerStyles.waterLayerStyle,
       stackOrder: 0
@@ -138,6 +141,7 @@ export class MapContainerComponent implements AfterViewInit {
   }
 
   async renderCapture() {
+    console.log(this.layerDetails);
     this.loading = true;
     setTimeout(() => {
       this.capture().then(() =>
@@ -147,9 +151,17 @@ export class MapContainerComponent implements AfterViewInit {
   }
 
   private async capture() {
+    const html2canvasOptions = {
+      allowTaint: true,
+      useCORS: true,
+      height: 500,
+      width: 500,
+      scale: 1
+    } as Options;
+
     const promises = this.layerDetails.map(async details => {
       const outputCanvas = document.getElementById(details.outputId) as HTMLCanvasElement;
-      const snapshotCanvas = await html2canvas(document.getElementById(details.divId) as HTMLElement, { allowTaint: true, useCORS: true });
+      const snapshotCanvas = await html2canvas(document.getElementById(details.divId) as HTMLElement, html2canvasOptions);
       return this.postProcess(details, outputCanvas, snapshotCanvas);
     });
 
@@ -175,14 +187,16 @@ export class MapContainerComponent implements AfterViewInit {
       // if pixel is white, make it transparent
       if (red === 255 && green === 255 && blue === 255) {
         data[i + 3] = 0;
-      } else if (!!details.color?.length) {
+      } else if (!!details.colorHex) {
+        const rgb = this.hexToRgb(details.colorHex);
+        if (!rgb?.length) throw new Error("Invalid color");
+
         const avg = (red + green + blue) / 3;
         const intensity = (255 - avg) / 255;
-        data[i] = details.color[0] * intensity;
-        data[i + 1] = details.color[1] * intensity;
-        data[i + 2] = details.color[2] * intensity;
+        data[i] = rgb[0] * intensity;
+        data[i + 1] = rgb[1] * intensity;
+        data[i + 2] = rgb[2] * intensity;
         data[i + 3] = 255 * intensity;
-
       }
 
       if (this.invert) {
@@ -194,7 +208,18 @@ export class MapContainerComponent implements AfterViewInit {
 
     outputContext.putImageData(imageData, 0, 0);
   }
+
+  // adapted from https://stackoverflow.com/a/39077686
+  hexToRgb(hex: string) {
+    var match = hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (_m, r, g, b) => '#' + r + r + g + g + b + b)
+      .substring(1)
+      .match(/.{2}/g);
+
+    return match?.map(x => parseInt(x, 16))
+
+  }
 }
+
 
 type MapDetailsType = {
   latitude: number;
@@ -205,10 +230,12 @@ type MapDetailsType = {
 type LayerDetailsType = {
   name: string;
   divId: string;
-  checkId: string;
-  outputId: string;
   visible: boolean;
-  color?: number[];
+  colorHex?: string;
   styles: google.maps.MapTypeStyle[];
   stackOrder: number;
+
+  checkId: string;
+  outputId: string;
+  colorId: string;
 }
