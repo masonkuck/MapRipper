@@ -27,8 +27,7 @@
             </div>
 
             <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="invert" [(ngModel)]="invert"
-                    (change)="renderCapture()">
+                <input class="form-check-input" type="checkbox" id="invert" [(ngModel)]="invert">
                 <label class="form-check-label" for="invert">Invert Output</label>
             </div>
 
@@ -76,7 +75,7 @@
 
                 <div class="wrapper" [class.bg-black]="invert">
                     <canvas *ngFor="let details of getStackedLayers" [id]="details.outputId" width="500" height="500"
-                        [class.d-none]="!details.visible || loading "></canvas>
+                        [class.d-none]="!details.visible || loading" [class.canvas-invert]="invert"></canvas>
                 </div>
             </div>
         </div>

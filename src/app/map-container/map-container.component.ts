@@ -174,7 +174,6 @@ export class MapContainerComponent implements AfterViewInit {
     let context = canvas.getContext('2d');
     if (!context) return;
 
-
     let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     let data = imageData.data;
 
@@ -183,10 +182,9 @@ export class MapContainerComponent implements AfterViewInit {
       const green = data[i + 1];
       const blue = data[i + 2];
 
-      // if pixel is white, make it transparent
-      if (red === 255 && green === 255 && blue === 255) {
+      if (red === 255 && green === 255 && blue === 255) { // if pixel is white, make it transparent
         data[i + 3] = 0;
-      } else if (!!details.colorHex) {
+      } else if (!!details.colorHex) { // Apply color mask to layer.
         const rgb = this.hexToRgb(details.colorHex);
         if (!rgb?.length) throw new Error("Invalid color");
 
@@ -196,12 +194,6 @@ export class MapContainerComponent implements AfterViewInit {
         data[i + 1] = rgb[1] * intensity;
         data[i + 2] = rgb[2] * intensity;
         data[i + 3] = 255 * intensity;
-      }
-
-      if (this.invert) {
-        data[i] = 255 - red;
-        data[i + 1] = 255 - green;
-        data[i + 2] = 255 - blue;
       }
     }
 
