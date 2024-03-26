@@ -5,10 +5,10 @@ Map Ripper is a tool designed to dissect Google Maps into separate layers and ou
 I needed high quality SVG files of seperated map layers so that I can make personal works of art.
 
 ## TODO List
-- Implement setting caching with Local Storage to make it easier to come back to the website in different states.
 - Address navigation (Find your house or city easier)
 - Save layers seperately into a ZIP folder for download.
 - More layers, with more refined styles. Currenty the Parks layer has some labels still sticking around.
+- Aspect Ratios and Size options
 
 ## Acknowledgements / Thanks 😄
 Thanks to Will Herrmann (https://github.com/willherr) for the encouragement, suggestions, and technical help.

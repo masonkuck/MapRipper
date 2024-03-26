@@ -1,17 +1,16 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { Loader } from 'google-maps';
 import html2canvas, { Options } from 'html2canvas';
-import { BehaviorSubject, debounceTime, delay, distinct, distinctUntilChanged, filter } from "rxjs";
+import { BehaviorSubject, debounceTime, filter } from "rxjs";
 import { LayerStyles } from './models/layer-styles';
 import { Config } from 'src/Config';
-import { color } from 'html2canvas/dist/types/css/types/color';
 
 @Component({
   selector: 'app-map-container',
   templateUrl: './map-container.component.html',
   styleUrls: ['./map-container.component.scss']
 })
-export class MapContainerComponent implements AfterViewInit {
+export class MapContainerComponent implements OnInit, AfterViewInit {
   private readonly apiKey = Config.API_KEY;
   private loader = new Loader(this.apiKey);
 
@@ -23,26 +22,31 @@ export class MapContainerComponent implements AfterViewInit {
   $mapDetails = new BehaviorSubject<MapDetailsType>(this.mapDetails);
 
   loading = true;
-  hotReload = true;
+  hotReload = false;
   invert = false;
 
   readonly layerDetails: LayerDetails[] = [
-    new LayerDetails("Water Map", "waterMap", LayerStyles.waterLayerStyle, true, "#00009e", 0),
-    new LayerDetails("Parks Map", "parksMap", LayerStyles.parksLayerStyle, true, "#00ff00", 1, 0.5),
-    new LayerDetails("Road Map", "roadMap", LayerStyles.roadsLayerStyle, true, "#000000", 2),
+    new LayerDetails("Water Map", "waterMap", LayerStyles.waterLayerStyle, "#00009e", 0),
+    new LayerDetails("Parks Map", "parksMap", LayerStyles.parksLayerStyle, "#00ff00", 1, 0.5),
+    new LayerDetails("Road Map", "roadMap", LayerStyles.roadsLayerStyle, "#000000", 2),
   ];
 
   get getStackedLayers(): LayerDetails[] {
     return this.layerDetails.sort((a, b) => a.stackOrder - b.stackOrder)
   }
 
-  mapObjects: Map<string, google.maps.Map<HTMLElement>> = new Map<string, google.maps.Map<HTMLElement>>();
-  targetMap: google.maps.Map<HTMLElement> | undefined;
+  private mapObjects: Map<string, google.maps.Map<HTMLElement>> = new Map<string, google.maps.Map<HTMLElement>>();
+  private targetMap: google.maps.Map<HTMLElement> | undefined;
+
+  ngOnInit(): void {
+    this.loadDefaults();
+    this.loadCachePayload();
+  }
 
   ngAfterViewInit(): void {
     this.loadMaps();
     this.$mapDetails
-      .pipe(debounceTime(250), filter(x => !this.loading))
+      .pipe(debounceTime(250), filter(() => !this.loading))
       .subscribe(x => {
         if (this.hotReload) this.loading = true;
         this.resetMap(x);
@@ -83,6 +87,8 @@ export class MapContainerComponent implements AfterViewInit {
 
     if (refreshTargetMap)
       this.$mapDetails.next(details);
+
+    this.storeCachePayload();
   }
 
   async loadMap(mapDivId: string) {
@@ -134,6 +140,7 @@ export class MapContainerComponent implements AfterViewInit {
         this.loading = false
       );
     }, 100);
+    this.storeCachePayload();
   }
 
   private async capture() {
@@ -144,7 +151,6 @@ export class MapContainerComponent implements AfterViewInit {
       width: 500,
       scale: 1
     } as Options;
-
     const promises = this.layerDetails.map(async details => {
       const outputCanvas = document.getElementById(details.outputId) as HTMLCanvasElement;
       const snapshotCanvas = await html2canvas(document.getElementById(details.divId) as HTMLElement, html2canvasOptions);
@@ -196,8 +202,63 @@ export class MapContainerComponent implements AfterViewInit {
     return match?.map(x => parseInt(x, 16))
 
   }
-}
 
+  private loadCachePayload() {
+    const cache = localStorage.getItem("mapDetails");
+    if (!cache) return;
+
+    const details = JSON.parse(cache) as CachePayload;
+
+    this.mapDetails = details.mapDetails;
+    this.invert = details.invert;
+    this.hotReload = details.hotReload;
+    this.layerDetails.forEach(layer => {
+      const cacheLayer = details.layerDetails.find(x => x.name === layer.name);
+      if (!cacheLayer) return;
+
+      layer.visible = cacheLayer.visible;
+      layer.colorHex = cacheLayer.colorHex;
+    });
+  }
+
+  public storeCachePayload() {
+    const cache: CachePayload = {
+      mapDetails: this.mapDetails,
+      invert: this.invert,
+      hotReload: this.hotReload,
+      layerDetails: this.layerDetails.map(x => {
+        return {
+          name: x.name,
+          visible: x.visible,
+          colorHex: x.colorHex,
+        }
+      })
+    };
+
+    localStorage.setItem("mapDetails", JSON.stringify(cache));
+  }
+
+  public loadDefaults(saveCache: boolean = false) {
+    this.mapDetails = {
+      latitude: 40.70782099171142,
+      longitude: -74.01146343775363,
+      zoom: 13,
+    };
+    this.invert = false;
+    this.hotReload = false;
+    this.layerDetails.forEach(layer => {
+      layer.visible = true;
+      layer.colorHex = layer.defaultColorHex;
+    });
+
+    if (saveCache) {
+      localStorage.removeItem("mapDetails");
+      this.loadMaps();
+    }
+
+  }
+
+}
 
 type MapDetailsType = {
   latitude: number;
@@ -205,22 +266,37 @@ type MapDetailsType = {
   zoom: number;
 }
 
-class LayerDetails {
+class LayerDetails implements ILayerDetails {
   constructor(
     public name: string,
     public divId: string,
     public styles?: google.maps.MapTypeStyle[] | undefined,
-    public visible: boolean = true,
-    public colorHex: string = "#000000",
+    public defaultColorHex: string = "#000000",
     public stackOrder: number = 0,
     public opacity?: number
   ) {
     this.checkId = name + "Visible";
     this.outputId = name + "Output";
     this.colorId = name + "Color";
+    this.colorHex = defaultColorHex;
   }
+  visible: boolean = true;
+  colorHex: string = "#000000";
 
   checkId: string;
   outputId: string;
   colorId: string;
+}
+
+interface ILayerDetails {
+  name: string,
+  visible: boolean,
+  colorHex: string,
+}
+
+type CachePayload = {
+  mapDetails: MapDetailsType;
+  layerDetails: ILayerDetails[];
+  invert: boolean;
+  hotReload: boolean;
 }
