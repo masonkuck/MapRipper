@@ -406,30 +406,9 @@ export abstract class LayerStyles {
             ]
         },
         {
-            featureType: "administrative",
-            elementType: "labels",
-            stylers: [
-                {
-                    visibility: "off"
-                }
-            ]
-        },
-        {
-            featureType: "administrative",
-            elementType: "labels.text.fill",
-            stylers: [
-                {
-                    color: "#444444"
-                }
-            ]
-        },
-        {
             featureType: "landscape",
             elementType: "all",
             stylers: [
-                {
-                    color: "#f2f2f2"
-                },
                 {
                     visibility: "off"
                 }
@@ -454,31 +433,43 @@ export abstract class LayerStyles {
             ]
         },
         {
-            featureType: "landscape.man_made",
-            elementType: "all",
-            stylers: [
-                {
-                    visibility: "on"
-                },
-                {
-                    hue: "#00a7ff"
-                }
-            ]
-        },
-        {
-            featureType: "landscape.natural",
-            elementType: "all",
-            stylers: [
-                {
-                    visibility: "on"
-                },
-                {
-                    hue: "#001cff"
-                }
-            ]
-        },
-        {
             featureType: "poi",
+            elementType: "all",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "poi.attraction",
+            elementType: "all",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "poi.business",
+            elementType: "geometry",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "poi.government",
+            elementType: "all",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "poi.medical",
             elementType: "all",
             stylers: [
                 {
@@ -504,6 +495,45 @@ export abstract class LayerStyles {
             stylers: [
                 {
                     visibility: "off"
+                },
+                {
+                    color: "#f6ebeb"
+                }
+            ]
+        },
+        {
+            featureType: "poi.park",
+            elementType: "labels.icon",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "poi.place_of_worship",
+            elementType: "all",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "poi.school",
+            elementType: "all",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "poi.sports_complex",
+            elementType: "all",
+            stylers: [
+                {
+                    visibility: "off"
                 }
             ]
         },
@@ -523,33 +553,6 @@ export abstract class LayerStyles {
             ]
         },
         {
-            featureType: "road",
-            elementType: "labels",
-            stylers: [
-                {
-                    visibility: "off"
-                }
-            ]
-        },
-        {
-            featureType: "road.highway",
-            elementType: "all",
-            stylers: [
-                {
-                    visibility: "off"
-                }
-            ]
-        },
-        {
-            featureType: "road.arterial",
-            elementType: "labels.icon",
-            stylers: [
-                {
-                    visibility: "off"
-                }
-            ]
-        },
-        {
             featureType: "transit",
             elementType: "all",
             stylers: [
@@ -563,12 +566,260 @@ export abstract class LayerStyles {
             elementType: "all",
             stylers: [
                 {
-                    color: "#59b2d6"
+                    visibility: "off"
+                }
+            ]
+        }
+    ]
+
+    public static readonly transitLayerStyle: google.maps.MapTypeStyle[] = [
+        {
+            featureType: "all",
+            elementType: "geometry",
+            stylers: [
+                {
+                    color: "#ffffff"
+                }
+            ]
+        },
+        {
+            featureType: "all",
+            elementType: "labels",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "all",
+            elementType: "labels.text.fill",
+            stylers: [
+                {
+                    gamma: 0.01
+                },
+                {
+                    lightness: 20
+                }
+            ]
+        },
+        {
+            featureType: "all",
+            elementType: "labels.text.stroke",
+            stylers: [
+                {
+                    saturation: -31
+                },
+                {
+                    lightness: -33
+                },
+                {
+                    weight: 2
+                },
+                {
+                    gamma: 0.8
+                }
+            ]
+        },
+        {
+            featureType: "all",
+            elementType: "labels.icon",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "administrative",
+            elementType: "all",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "landscape",
+            elementType: "all",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "landscape",
+            elementType: "geometry",
+            stylers: [
+                {
+                    lightness: 30
+                },
+                {
+                    saturation: 30
+                }
+            ]
+        },
+        {
+            featureType: "poi",
+            elementType: "all",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "poi",
+            elementType: "geometry",
+            stylers: [
+                {
+                    saturation: 20
+                }
+            ]
+        },
+        {
+            featureType: "poi.park",
+            elementType: "geometry",
+            stylers: [
+                {
+                    lightness: 20
+                },
+                {
+                    saturation: -20
+                }
+            ]
+        },
+        {
+            featureType: "road",
+            elementType: "all",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "road",
+            elementType: "geometry",
+            stylers: [
+                {
+                    lightness: 10
+                },
+                {
+                    saturation: -30
+                },
+                {
+                    color: "#030303"
+                }
+            ]
+        },
+        {
+            featureType: "road",
+            elementType: "geometry.fill",
+            stylers: [
+                {
+                    color: "#030303"
+                }
+            ]
+        },
+        {
+            featureType: "road",
+            elementType: "geometry.stroke",
+            stylers: [
+                {
+                    saturation: 25
+                },
+                {
+                    lightness: 25
+                },
+                {
+                    color: "#030303"
+                }
+            ]
+        },
+        {
+            featureType: "transit",
+            elementType: "all",
+            stylers: [
+                {
+                    visibility: "on"
+                }
+            ]
+        },
+        {
+            featureType: "transit",
+            elementType: "geometry",
+            stylers: [
+                {
+                    color: "#030303"
+                }
+            ]
+        },
+        {
+            featureType: "transit",
+            elementType: "geometry.fill",
+            stylers: [
+                {
+                    visibility: "on"
+                }
+            ]
+        },
+        {
+            featureType: "transit",
+            elementType: "geometry.stroke",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "transit",
+            elementType: "labels",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "transit.station",
+            elementType: "geometry",
+            stylers: [
+                {
+                    visibility: "off"
+                }
+            ]
+        },
+        {
+            featureType: "transit.line",
+            elementType: "geometry.fill",
+            stylers: [
+                {
+                    // @ts-ignore
+                    weight: "1.5"
+                },
+                {
+                    invert_lightness: true
+                },
+                {
+                    // @ts-ignore
+                    gamma: "0.00"
+                }
+            ]
+        },
+        {
+            featureType: "water",
+            elementType: "all",
+            stylers: [
+                {
+                    lightness: -20
                 },
                 {
                     visibility: "off"
                 }
             ]
         }
-    ]
+    ];
 }

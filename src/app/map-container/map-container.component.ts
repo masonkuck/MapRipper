@@ -28,7 +28,8 @@ export class MapContainerComponent implements OnInit, AfterViewInit {
   readonly layerDetails: LayerDetails[] = [
     new LayerDetails("Water Map", "waterMap", LayerStyles.waterLayerStyle, "#00009e", 0),
     new LayerDetails("Parks Map", "parksMap", LayerStyles.parksLayerStyle, "#00ff00", 1, 0.5),
-    new LayerDetails("Road Map", "roadMap", LayerStyles.roadsLayerStyle, "#000000", 2),
+    new LayerDetails("Transit Map", "transitMap", LayerStyles.transitLayerStyle, "#ffffff", 2),
+    new LayerDetails("Road Map", "roadMap", LayerStyles.roadsLayerStyle, "#000000", 3),
   ];
 
   get getStackedLayers(): LayerDetails[] {
