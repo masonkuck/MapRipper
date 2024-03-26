@@ -55,7 +55,7 @@
                 </div>
 
                 <div class="wrapper" [class.bg-black]="invert">
-                    <canvas *ngFor="let details of layerDetails" [id]="details.outputId" width="500" height="500"
+                    <canvas *ngFor="let details of getStackedLayers" [id]="details.outputId" width="500" height="500"
                         [class.d-none]="!details.visible || loading "></canvas>
                 </div>
             </div>

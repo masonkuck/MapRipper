@@ -33,20 +33,26 @@ export class MapContainerComponent implements AfterViewInit {
       checkId: "roadMapVisible",
       outputId: "roadMapOutput",
       name: "Road Map",
-      color: "",
+      color: [0, 0, 0],
       visible: true,
-      styles: LayerStyles.roadsLayerStyle
+      styles: LayerStyles.roadsLayerStyle,
+      stackOrder: 1
     },
     {
       divId: "waterMap",
       checkId: "waterMapVisible",
       outputId: "waterMapOutput",
       name: "Water Map",
-      color: "",
+      color: [0, 0, 255],
       visible: true,
-      styles: LayerStyles.waterLayerStyle
+      styles: LayerStyles.waterLayerStyle,
+      stackOrder: 0
     }
   ];
+
+  get getStackedLayers(): LayerDetailsType[] {
+    return this.layerDetails.sort((a, b) => a.stackOrder - b.stackOrder)
+  }
 
   mapObjects: Map<string, google.maps.Map<HTMLElement>> = new Map<string, google.maps.Map<HTMLElement>>();
 
@@ -71,8 +77,6 @@ export class MapContainerComponent implements AfterViewInit {
       .map(details => this.loadMap(details.divId).then(mapObj => {
         if (!!mapObj) {
           this.mapObjects.set(details.divId, mapObj);
-          mapObj.setHeading(20);
-          console.log(mapObj.getHeading());
         }
       }));
 
@@ -149,15 +153,16 @@ export class MapContainerComponent implements AfterViewInit {
   }
 
   private async capture() {
-    const promises = this.layerDetails.map(details => {
-      const output = document.getElementById(details.outputId) as HTMLCanvasElement;
-      return html2canvas(document.getElementById(details.divId) as HTMLElement, { allowTaint: true, useCORS: true }).then(x => this.postProcess(output, x))
+    const promises = this.layerDetails.map(async details => {
+      const outputCanvas = document.getElementById(details.outputId) as HTMLCanvasElement;
+      const snapshotCanvas = await html2canvas(document.getElementById(details.divId) as HTMLElement, { allowTaint: true, useCORS: true });
+      return this.postProcess(details, outputCanvas, snapshotCanvas);
     });
 
     await Promise.all(promises);
   }
 
-  postProcess(outputCanvas: HTMLCanvasElement, canvas: HTMLCanvasElement) {
+  postProcess(details: LayerDetailsType, outputCanvas: HTMLCanvasElement, canvas: HTMLCanvasElement) {
     let outputContext = outputCanvas.getContext('2d');
     if (!outputContext) return;
 
@@ -176,7 +181,16 @@ export class MapContainerComponent implements AfterViewInit {
       // if pixel is white, make it transparent
       if (red === 255 && green === 255 && blue === 255) {
         data[i + 3] = 0;
+      } else if (!!details.color?.length) {
+        const avg = (red + green + blue) / 3;
+        const intensity = (255 - avg) / 255;
+        data[i] = details.color[0] * intensity;
+        data[i + 1] = details.color[1] * intensity;
+        data[i + 2] = details.color[2] * intensity;
+        data[i + 3] = 255 * intensity;
+
       }
+
       if (this.invert) {
         data[i] = 255 - red;
         data[i + 1] = 255 - green;
@@ -200,6 +214,7 @@ type LayerDetailsType = {
   checkId: string;
   outputId: string;
   visible: boolean;
-  color: string;
+  color?: number[];
   styles: google.maps.MapTypeStyle[];
+  stackOrder: number;
 }
