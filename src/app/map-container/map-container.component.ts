@@ -27,6 +27,7 @@ export class MapContainerComponent implements AfterViewInit {
   roadMapVisible = true;
   waterMapVisible = true;
   hotReload = false;
+  invert = false;
 
   readonly mapNames = ["roadMap", "waterMap"];
   readonly roadMapId = this.mapNames[0];
@@ -60,9 +61,9 @@ export class MapContainerComponent implements AfterViewInit {
     setTimeout(() => this.capture().then(x => this.loading = false), 1000);
   }
 
-  resetMap(details: MapDetailsType){
+  resetMap(details: MapDetailsType, ignoreLastChanged: boolean = false){
     [...this.mapObjects]
-      .filter(x => x[0] !== this.lastChange)
+      .filter(x => ignoreLastChanged || x[0] !== this.lastChange)
       .map(x => x[1])
       .forEach(map => {
         map.setCenter({lat: details.latitude, lng: details.longitude});
@@ -152,6 +153,11 @@ export class MapContainerComponent implements AfterViewInit {
       // if pixel is white, make it transparent
       if (red === 255 && green === 255 && blue === 255) {
         data[i + 3] = 0;
+      }
+      if (this.invert){
+        data[i] = 255 - red;
+        data[i + 1] = 255 - green;
+        data[i + 2] = 255 - blue;
       }
     }
 

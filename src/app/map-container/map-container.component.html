@@ -2,19 +2,19 @@
     <div class="col-2 form-group">
         <label for="latitude">Latitude</label>
         <input type="number" class="form-control" id="latitude" placeholder="Enter latitude" step="0.000001"
-            [(ngModel)]="mapDetails.latitude" (change)="resetMap(this.mapDetails)">
+            [(ngModel)]="mapDetails.latitude" (change)="resetMap(this.mapDetails, true)">
     </div>
 
     <div class="col-2 form-group">
         <label for="longitude">Longitude</label>
         <input type="number" class="form-control" id="longitude" placeholder="Enter longitude" step="0.000001"
-            [(ngModel)]="mapDetails.longitude" (change)="resetMap(this.mapDetails)">
+            [(ngModel)]="mapDetails.longitude" (change)="resetMap(this.mapDetails, true)">
     </div>
 
     <div class="col-2 form-group">
         <label for="zoom">Zoom</label>
-        <input type="number" class="form-control" id="longitude" placeholder="Zoom" step="1" min="1" max="22"
-            [(ngModel)]="mapDetails.zoom" (change)="resetMap(this.mapDetails)">
+        <input type="range" class="form-control" id="longitude" placeholder="Zoom" step="1" min="1" max="22"
+            [(ngModel)]="mapDetails.zoom" (change)="resetMap(this.mapDetails, true)">
     </div>
 
     <div class="col d-flex" style="align-items: center;">
@@ -30,9 +30,13 @@
             <input class="form-check-input" type="checkbox" id="hotReload" [(ngModel)]="hotReload">
             <label class="form-check-label" for="hotReload">Hot Reload <span title="Use with caution. Erratic map pans and zooms can cause this to break. I recommend using this with the inputs to the left">❔</span></label>
         </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="invert" [(ngModel)]="invert" (change)="capture()">
+            <label class="form-check-label" for="invert" >Invert Output</label>
+        </div>
     </div>
 
-    <div class="col-3 d-flex" style="align-items: center;">
+    <div class="col-2 d-flex" style="align-items: center;">
         <button class="btn btn-primary me-2" (click)="loadMaps()"> Load Maps</button>
         <button class="btn btn-primary" (click)="capture()"> Capture Images</button>
     </div>
@@ -57,7 +61,7 @@
             </div>
         </div>
 
-        <div class="wrapper">
+        <div class="wrapper" [class.bg-black]="invert">
             <canvas id="captureOutput" width="500" height="500" [class.d-none]="!roadMapVisible || loading "></canvas>
             <canvas id="captureOutput2" width="500" height="500" [class.d-none]="!waterMapVisible || loading"></canvas>
         </div>
