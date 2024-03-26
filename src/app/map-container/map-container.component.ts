@@ -141,7 +141,6 @@ export class MapContainerComponent implements AfterViewInit {
   }
 
   async renderCapture() {
-    console.log(this.layerDetails);
     this.loading = true;
     setTimeout(() => {
       this.capture().then(() =>
