@@ -1,6 +1,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-3">
+            <h2>Settings</h2>
             <div class="form-group">
                 <label for="latitude">Latitude</label>
                 <input type="number" class="form-control" id="latitude" placeholder="Enter latitude" step="0.000001"
@@ -57,10 +58,11 @@
             </div>
         </div>
         <div class="col-md">
+            <h2>Layers</h2>
             <div class="map-scroll">
                 <div *ngFor="let details of layerDetails">
                     <h2>{{details.name}}</h2>
-                    <div [id]="details.divId" class="layer-map "></div>
+                    <div [id]="details.divId" class="layer-map"></div>
                 </div>
             </div>
         </div>
@@ -75,7 +77,8 @@
 
                 <div class="wrapper" [class.bg-black]="invert">
                     <canvas *ngFor="let details of getStackedLayers" [id]="details.outputId" width="500" height="500"
-                        [class.d-none]="!details.visible || loading" [class.canvas-invert]="invert"></canvas>
+                        [style]="{opacity: details.opacity ?? '1'}" [class.d-none]="!details.visible || loading"
+                        [class.canvas-invert]="invert"></canvas>
                 </div>
             </div>
         </div>

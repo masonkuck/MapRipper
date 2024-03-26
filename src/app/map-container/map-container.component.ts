@@ -1,7 +1,7 @@
 import { AfterViewInit, Component } from '@angular/core';
 import { Loader } from 'google-maps';
 import html2canvas, { Options } from 'html2canvas';
-import { BehaviorSubject, debounceTime, delay, distinct, distinctUntilChanged } from "rxjs";
+import { BehaviorSubject, debounceTime, delay, distinct, distinctUntilChanged, filter } from "rxjs";
 import { LayerStyles } from './models/layer-styles';
 import { Config } from 'src/Config';
 import { color } from 'html2canvas/dist/types/css/types/color';
@@ -45,10 +45,22 @@ export class MapContainerComponent implements AfterViewInit {
       outputId: "waterMapOutput",
       colorId: "waterMapColor",
       name: "Water Map",
-      colorHex: "#0000ff",
+      colorHex: "#00009e",
       visible: true,
       styles: LayerStyles.waterLayerStyle,
       stackOrder: 0
+    },
+    {
+      divId: "parksMap",
+      checkId: "parksMapVisible",
+      outputId: "parksMapOutput",
+      colorId: "parksMapColor",
+      name: "Parks Map",
+      colorHex: "#00ff00",
+      visible: true,
+      styles: LayerStyles.parksLayerStyle,
+      stackOrder: 2,
+      opacity: 0.5
     }
   ];
 
@@ -60,8 +72,11 @@ export class MapContainerComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.loadMaps();
+    setTimeout(() => {
+      document.getElementById(this.layerDetails[0].divId)?.parentElement?.parentElement?.scrollTo({ top: 0, behavior: "auto" });
+    }, 500);
     this.$mapDetails
-      .pipe(debounceTime(250))
+      .pipe(debounceTime(250), filter(x => !this.loading))
       .subscribe(x => {
         if (this.hotReload) this.loading = true;
         this.resetMap(x);
@@ -115,7 +130,6 @@ export class MapContainerComponent implements AfterViewInit {
       keyboardShortcuts: false,
       draggable: true,
       backgroundColor: "#ffffff",
-
       styles: styles
     };
 
@@ -137,6 +151,11 @@ export class MapContainerComponent implements AfterViewInit {
       this.lastChange = mapDivId;
       this.$mapDetails.next(this.mapDetails);
     };
+
+    setTimeout(() => {
+      mapDiv?.scrollIntoView({ behavior: "auto" });
+    }, 100);
+
     return map;
   }
 
@@ -225,6 +244,7 @@ type LayerDetailsType = {
   colorHex?: string;
   styles: google.maps.MapTypeStyle[];
   stackOrder: number;
+  opacity?: number;
 
   checkId: string;
   outputId: string;
