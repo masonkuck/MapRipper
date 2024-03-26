@@ -3,26 +3,13 @@
     width: 500px;
     height: 500px;
     border: 1px solid #ccc;
-    cursor: not-allowed;
 }
 
-.wrapper canvas {
+.wrapper canvas,.wrapper div {
     position: absolute;
     top: 0;
     left: 0;
 }
-
-.map-scroll {
-    height: 90vh;
-    overflow-y: scroll;
-    border: 1px solid #ccc;
-    margin-top: 5px;
-
-    h2 {
-        width: fit-content;
-        margin-right: auto;
-        margin-left: auto;
-    }
 
     .layer-map {
         border: 1px solid #ccc;
@@ -31,7 +18,6 @@
         margin-right: auto;
         margin-left: auto;
     }
-}
 
 input[type=color]{
     width: 50%;
