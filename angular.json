@@ -15,9 +15,15 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-builders/custom-webpack:browser",
           "options": {
-            "outputPath": "dist/map-ripper",
+            "outputPath": "docs/",
+            "customWebpackConfig": {
+              "path": "./webpack.config.js",
+              "mergeStrategies": {
+                "module.rules": "prepend"
+              }
+            },
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
