@@ -20,61 +20,27 @@ export class MapContainerComponent implements AfterViewInit {
     longitude: -74.01146343775363,
     zoom: 13,
   };
-  lastChange?: string;
   $mapDetails = new BehaviorSubject<MapDetailsType>(this.mapDetails);
 
   loading = true;
   hotReload = true;
   invert = false;
 
-  readonly layerDetails: LayerDetailsType[] = [
-    {
-      divId: "roadMap",
-      checkId: "roadMapVisible",
-      outputId: "roadMapOutput",
-      colorId: "roadMapColor",
-      name: "Road Map",
-      colorHex: "#000000",
-      visible: true,
-      styles: LayerStyles.roadsLayerStyle,
-      stackOrder: 1
-    },
-    {
-      divId: "waterMap",
-      checkId: "waterMapVisible",
-      outputId: "waterMapOutput",
-      colorId: "waterMapColor",
-      name: "Water Map",
-      colorHex: "#00009e",
-      visible: true,
-      styles: LayerStyles.waterLayerStyle,
-      stackOrder: 0
-    },
-    {
-      divId: "parksMap",
-      checkId: "parksMapVisible",
-      outputId: "parksMapOutput",
-      colorId: "parksMapColor",
-      name: "Parks Map",
-      colorHex: "#00ff00",
-      visible: true,
-      styles: LayerStyles.parksLayerStyle,
-      stackOrder: 2,
-      opacity: 0.5
-    }
+  readonly layerDetails: LayerDetails[] = [
+    new LayerDetails("Water Map", "waterMap", LayerStyles.waterLayerStyle, true, "#00009e", 0),
+    new LayerDetails("Parks Map", "parksMap", LayerStyles.parksLayerStyle, true, "#00ff00", 1, 0.5),
+    new LayerDetails("Road Map", "roadMap", LayerStyles.roadsLayerStyle, true, "#000000", 2),
   ];
 
-  get getStackedLayers(): LayerDetailsType[] {
+  get getStackedLayers(): LayerDetails[] {
     return this.layerDetails.sort((a, b) => a.stackOrder - b.stackOrder)
   }
 
   mapObjects: Map<string, google.maps.Map<HTMLElement>> = new Map<string, google.maps.Map<HTMLElement>>();
+  targetMap: google.maps.Map<HTMLElement> | undefined;
 
   ngAfterViewInit(): void {
     this.loadMaps();
-    setTimeout(() => {
-      document.getElementById(this.layerDetails[0].divId)?.parentElement?.parentElement?.scrollTo({ top: 0, behavior: "auto" });
-    }, 500);
     this.$mapDetails
       .pipe(debounceTime(250), filter(x => !this.loading))
       .subscribe(x => {
@@ -89,7 +55,7 @@ export class MapContainerComponent implements AfterViewInit {
   async loadMaps(exclude: string | undefined = undefined) {
     this.loading = true;
 
-    const promises = this.layerDetails
+    const promises: Promise<any>[] = this.layerDetails
       .filter(details => details.divId !== exclude)
       .map(details => this.loadMap(details.divId).then(mapObj => {
         if (!!mapObj) {
@@ -97,18 +63,26 @@ export class MapContainerComponent implements AfterViewInit {
         }
       }));
 
+    promises.push(this.loadMap("targetMap").then(x => this.targetMap = x));
+
     await Promise.all(promises);
-    setTimeout(() => this.capture().then(x => this.loading = false), 1000);
+    setTimeout(() => this.capture().then(() => this.loading = false), 1000);
   }
 
-  resetMap(details: MapDetailsType, ignoreLastChanged: boolean = false) {
-    [...this.mapObjects]
-      .filter(x => ignoreLastChanged || x[0] !== this.lastChange)
-      .map(x => x[1])
-      .forEach(map => {
-        map.setCenter({ lat: details.latitude, lng: details.longitude });
-        map.setZoom(details.zoom);
-      });
+  resetMap(details: MapDetailsType, refreshTargetMap: boolean = false) {
+    if (!this.targetMap) return;
+
+    const mapsToUpdate = [...this.mapObjects].map(map => map[1]);
+    if (refreshTargetMap)
+      mapsToUpdate.push(this.targetMap);
+
+    mapsToUpdate.forEach(map => {
+      map.setCenter({ lat: details.latitude, lng: details.longitude });
+      map.setZoom(details.zoom);
+    });
+
+    if (refreshTargetMap)
+      this.$mapDetails.next(details);
   }
 
   async loadMap(mapDivId: string) {
@@ -148,14 +122,8 @@ export class MapContainerComponent implements AfterViewInit {
         return;
       }
 
-      this.lastChange = mapDivId;
       this.$mapDetails.next(this.mapDetails);
     };
-
-    setTimeout(() => {
-      mapDiv?.scrollIntoView({ behavior: "auto" });
-    }, 100);
-
     return map;
   }
 
@@ -186,7 +154,7 @@ export class MapContainerComponent implements AfterViewInit {
     await Promise.all(promises);
   }
 
-  postProcess(details: LayerDetailsType, outputCanvas: HTMLCanvasElement, canvas: HTMLCanvasElement) {
+  private postProcess(details: LayerDetails, outputCanvas: HTMLCanvasElement, canvas: HTMLCanvasElement) {
     let outputContext = outputCanvas.getContext('2d');
     if (!outputContext) return;
 
@@ -220,7 +188,7 @@ export class MapContainerComponent implements AfterViewInit {
   }
 
   // adapted from https://stackoverflow.com/a/39077686
-  hexToRgb(hex: string) {
+  private hexToRgb(hex: string) {
     var match = hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, (_m, r, g, b) => '#' + r + r + g + g + b + b)
       .substring(1)
       .match(/.{2}/g);
@@ -237,14 +205,20 @@ type MapDetailsType = {
   zoom: number;
 }
 
-type LayerDetailsType = {
-  name: string;
-  divId: string;
-  visible: boolean;
-  colorHex?: string;
-  styles: google.maps.MapTypeStyle[];
-  stackOrder: number;
-  opacity?: number;
+class LayerDetails {
+  constructor(
+    public name: string,
+    public divId: string,
+    public styles?: google.maps.MapTypeStyle[] | undefined,
+    public visible: boolean = true,
+    public colorHex: string = "#000000",
+    public stackOrder: number = 0,
+    public opacity?: number
+  ) {
+    this.checkId = name + "Visible";
+    this.outputId = name + "Output";
+    this.colorId = name + "Color";
+  }
 
   checkId: string;
   outputId: string;

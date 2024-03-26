@@ -57,15 +57,17 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md">
-            <h2>Layers</h2>
-            <div class="map-scroll">
+            <h2>Target</h2>
+            <div class="wrapper">
                 <div *ngFor="let details of layerDetails">
-                    <h2>{{details.name}}</h2>
                     <div [id]="details.divId" class="layer-map"></div>
                 </div>
+                <div id="targetMap" class="layer-map"></div>
             </div>
         </div>
+
         <div class="col-md">
             <div>
                 <div class="d-flex">
