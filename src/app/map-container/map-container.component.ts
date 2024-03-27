@@ -301,8 +301,8 @@ class MapDetailsType {
   latitude: number = 40.70782099171142;
   longitude: number = -74.01146343775363;
   zoom: number = 13;
-  width: number = 500;
-  height: number = 500;
+  width: number = 700;
+  height: number = 700;
 
   get style() {
     return {

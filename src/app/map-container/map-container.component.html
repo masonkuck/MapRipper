@@ -1,101 +1,22 @@
 <div class="container-fluid" *ngIf="!!mapDetails">
     <div class="row">
-        <div class="col-md-3">
-            <div class="h-50">
-                <h2>Settings</h2>
-                <div class="row">
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="latitude">Latitude</label>
-                            <input type="number" class="form-control" id="latitude" placeholder="Enter latitude"
-                                step="0.000001" [(ngModel)]="mapDetails.latitude"
-                                (change)="resetMap(this.mapDetails, true)">
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="longitude">Longitude</label>
-                            <input type="number" class="form-control" id="longitude" placeholder="Enter longitude"
-                                step="0.000001" [(ngModel)]="mapDetails.longitude"
-                                (change)="resetMap(this.mapDetails, true)">
-                        </div>
-                    </div>
-                </div>
+        <div class="col"></div>
+        <div class="col mt-2">
+            <div class="w-100 d-flex align-items-center  justify-content-between">
+                <button class="btn btn-secondary" (click)="loadDefaults(true)">Reset to Default</button>
+                <button class="btn btn-secondary" (click)="loadMaps()" title="Sometimes needed if the maps disapear">
+                    Reload Maps</button>
+                <button class="btn btn-primary" (click)="renderCapture()"> Load Preview</button>
 
-                <div class="row">
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="height">Height</label>
-                            <input type="number" class="form-control" id="height" placeholder="Enter Height" step="1"
-                                min="100" max="1000" [(ngModel)]="mapDetails.height"
-                                (change)="resetMap(this.mapDetails, true)">
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="width">Width</label>
-                            <input type="number" class="form-control" id="width" placeholder="Enter Width" step="1"
-                                min="100" max="1000" [(ngModel)]="mapDetails.width"
-                                (change)="resetMap(this.mapDetails, true)">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="zoom">Zoom</label>
-                    <input type="range" class="form-control" id="zoom" placeholder="Zoom" step="1" min="1" max="22"
-                        [(ngModel)]="mapDetails.zoom" (change)="resetMap(this.mapDetails, true)">
-                </div>
-
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="hotReload" [(ngModel)]="hotReload"
-                        (change)="renderCapture()">
-                    <label class="form-check-label" for="hotReload">Hot Reload Preview<span
-                            title="Use with caution. Erratic map pans and zooms can cause this to break. I recommend using this with the inputs to the left">❔</span></label>
-                </div>
-
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="invert" [(ngModel)]="invert"
-                        (change)="resetMap(this.mapDetails, true)">
-                    <label class="form-check-label" for="invert">Invert Output</label>
-                </div>
-
-                <div class="d-flex my-2" style="align-items: center; justify-content: center;">
-                    <button class="btn btn-secondary me-2" (click)="loadDefaults(true)">Reset to Default</button>
-                    <button class="btn btn-secondary me-2" (click)="loadMaps()"
-                        title="Sometimes needed if the maps disapear"> Reload Maps</button>
-                    <button class="btn btn-primary" (click)="renderCapture()"> Load Preview</button>
-                </div>
-
-                <div class="d-flex my-2" style="align-items: center; justify-content: center;">
-                    <button class="btn btn-primary" (click)="downloadLayers()"> Download Layers</button>
-                </div>
-
-            </div>
-
-            <div class="layer-scroll h-40">
-                <h2>Layer Settings</h2>
-                <div class="ms-2 mb-2" *ngFor="let details of layerDetails">
-                    <h4>{{details.name}}</h4>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" [id]="details.checkId"
-                            [(ngModel)]="details.visible" (change)="storeCachePayload()">
-                        <label class="form-check-label" [for]="details.checkId">Show {{ details.name}} In
-                            Preview</label>
-                    </div>
-
-                    <div class="form-group">
-                        <label [for]="details.colorId">Layer Color - {{details.colorHex}}</label>
-                        <input type="color" class="form-control" [id]="details.colorId" [(ngModel)]="details.colorHex"
-                            (change)="renderCapture()">
-                    </div>
-                </div>
+                <button class="btn btn-primary" (click)="downloadLayers()"> Download Layers</button>
             </div>
         </div>
-
+        <div class="col"></div>
+    </div>
+    <div class="row">
         <div class="col-md">
-            <h2>Target</h2>
-            <div class="wrapper" [style]="mapDetails.style">
+            <h2 class="mx-auto" style="width: fit-content;">Target</h2>
+            <div class="wrapper mx-auto" [style]="mapDetails.style">
                 <div *ngFor="let details of layerDetails">
                     <div [id]="details.divId" class="layer-map" [style]="mapDetails.style"></div>
                 </div>
@@ -106,17 +27,99 @@
 
         <div class="col-md">
             <div>
-                <div class="d-flex">
+                <div class="mx-auto d-flex" style="width: fit-content;">
                     <h2 class="me-2">Preview</h2>
 
                     <div *ngIf="loading" class="spinner-border" role="status">
                     </div>
                 </div>
 
-                <div class="wrapper" [class.bg-black]="invert" [style]="mapDetails.style">
+                <div class="wrapper  mx-auto" [class.bg-black]="invert" [style]="mapDetails.style">
                     <canvas *ngFor="let details of getStackedLayers" [id]="details.outputId" [width]="mapDetails.width"
                         [height]="mapDetails.height" [style]="{opacity: details.opacity ?? '1'}"
                         [class.d-none]="!details.visible || loading" [class.canvas-invert]="invert"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="offcanvas offcanvas-start" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1"
+        id="settingsDrawer">
+        <div class="offcanvas-header">
+            <h2>Settings</h2>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="latitude">Latitude</label>
+                        <input type="number" class="form-control" id="latitude" placeholder="Enter latitude"
+                            step="0.000001" [(ngModel)]="mapDetails.latitude"
+                            (change)="resetMap(this.mapDetails, true)">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="longitude">Longitude</label>
+                        <input type="number" class="form-control" id="longitude" placeholder="Enter longitude"
+                            step="0.000001" [(ngModel)]="mapDetails.longitude"
+                            (change)="resetMap(this.mapDetails, true)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="height">Height</label>
+                        <input type="number" class="form-control" id="height" placeholder="Enter Height" step="1"
+                            min="100" max="1000" [(ngModel)]="mapDetails.height"
+                            (blur)="resetMap(this.mapDetails, true)">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="width">Width</label>
+                        <input type="number" class="form-control" id="width" placeholder="Enter Width" step="1"
+                            min="100" max="1000" [(ngModel)]="mapDetails.width"
+                            (blur)="resetMap(this.mapDetails, true)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="zoom">Zoom</label>
+                <input type="range" class="form-control" id="zoom" placeholder="Zoom" step="1" min="1" max="22"
+                    [(ngModel)]="mapDetails.zoom" (change)="resetMap(this.mapDetails, true)">
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="hotReload" [(ngModel)]="hotReload"
+                    (change)="renderCapture()">
+                <label class="form-check-label" for="hotReload">Hot Reload Preview<span
+                        title="Use with caution. Fast map pans and zooms can cause this to break">❔</span></label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="invert" [(ngModel)]="invert"
+                    (change)="resetMap(this.mapDetails, true)">
+                <label class="form-check-label" for="invert">Invert Output</label>
+            </div>
+
+            <h2>Layer Settings</h2>
+            <div class="ms-2 mb-2" *ngFor="let details of layerDetails">
+                <h4>{{details.name}}</h4>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" [id]="details.checkId" [(ngModel)]="details.visible"
+                        (change)="storeCachePayload()">
+                    <label class="form-check-label" [for]="details.checkId">Show {{ details.name}} In
+                        Preview</label>
+                </div>
+
+                <div class="form-group">
+                    <label [for]="details.colorId">Layer Color - {{details.colorHex}}</label>
+                    <input type="color" class="form-control" [id]="details.colorId" [(ngModel)]="details.colorHex"
+                        (change)="renderCapture()">
                 </div>
             </div>
         </div>
