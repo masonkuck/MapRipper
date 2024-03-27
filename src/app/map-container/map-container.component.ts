@@ -4,6 +4,8 @@ import html2canvas, { Options } from 'html2canvas';
 import { BehaviorSubject, debounceTime, filter } from "rxjs";
 import { LayerStyles } from './models/layer-styles';
 import { Config } from 'src/Config';
+import * as FileSaver from 'file-saver';
+import * as JSZip from 'jszip';
 
 @Component({
   selector: 'app-map-container',
@@ -142,6 +144,29 @@ export class MapContainerComponent implements OnInit, AfterViewInit {
       );
     }, 100);
     this.storeCachePayload();
+  }
+
+  public async downloadLayers() {
+    const zip = new JSZip();
+    type blobPromise = { file: Blob, name: string };
+    const promises: Promise<blobPromise>[] = this.layerDetails.map(layer => {
+      return new Promise(resolve => {
+
+        const canvas = document.getElementById(layer.outputId) as HTMLCanvasElement;
+        const context = canvas.getContext("2d");
+        if (!context) return;
+
+        canvas.toBlob(x => resolve({ file: x!, name: layer.divId }));
+      }
+      );
+    });
+
+    const blobs = await Promise.all(promises as Promise<blobPromise>[]);
+    blobs.forEach(x => zip.file(x.name + ".png", x.file));
+
+    await zip.generateAsync({ type: 'blob' }).then(function (content) {
+      FileSaver.saveAs(content, 'layers.zip');
+    });
   }
 
   private async capture() {

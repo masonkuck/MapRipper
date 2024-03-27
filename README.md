@@ -6,7 +6,6 @@ I needed high quality SVG files of seperated map layers so that I can make perso
 
 ## TODO List
 - Address navigation (Find your house or city easier)
-- Save layers seperately into a ZIP folder for download.
 - More layers, with more refined styles. Currenty the Parks layer has some labels still sticking around.
 - Aspect Ratios and Size options
 
