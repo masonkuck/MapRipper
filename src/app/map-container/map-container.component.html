@@ -1,18 +1,44 @@
-<div class="container-fluid">
+<div class="container-fluid" *ngIf="!!mapDetails">
     <div class="row">
         <div class="col-md-3">
             <div class="h-50">
                 <h2>Settings</h2>
-                <div class="form-group">
-                    <label for="latitude">Latitude</label>
-                    <input type="number" class="form-control" id="latitude" placeholder="Enter latitude" step="0.000001"
-                        [(ngModel)]="mapDetails.latitude" (change)="resetMap(this.mapDetails, true)">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="latitude">Latitude</label>
+                            <input type="number" class="form-control" id="latitude" placeholder="Enter latitude"
+                                step="0.000001" [(ngModel)]="mapDetails.latitude"
+                                (change)="resetMap(this.mapDetails, true)">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="longitude">Longitude</label>
+                            <input type="number" class="form-control" id="longitude" placeholder="Enter longitude"
+                                step="0.000001" [(ngModel)]="mapDetails.longitude"
+                                (change)="resetMap(this.mapDetails, true)">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="longitude">Longitude</label>
-                    <input type="number" class="form-control" id="longitude" placeholder="Enter longitude"
-                        step="0.000001" [(ngModel)]="mapDetails.longitude" (change)="resetMap(this.mapDetails, true)">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="height">Height</label>
+                            <input type="number" class="form-control" id="height" placeholder="Enter Height" step="1"
+                                min="100" max="1000" [(ngModel)]="mapDetails.height"
+                                (change)="resetMap(this.mapDetails, true)">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="width">Width</label>
+                            <input type="number" class="form-control" id="width" placeholder="Enter Width" step="1"
+                                min="100" max="1000" [(ngModel)]="mapDetails.width"
+                                (change)="resetMap(this.mapDetails, true)">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -69,11 +95,12 @@
 
         <div class="col-md">
             <h2>Target</h2>
-            <div class="wrapper">
+            <div class="wrapper" [style]="mapDetails.style">
                 <div *ngFor="let details of layerDetails">
-                    <div [id]="details.divId" class="layer-map"></div>
+                    <div [id]="details.divId" class="layer-map" [style]="mapDetails.style"></div>
                 </div>
-                <div id="targetMap" class="layer-map"></div>
+                <div id="targetMap" class="layer-map" [style]="mapDetails.style">
+                </div>
             </div>
         </div>
 
@@ -86,10 +113,10 @@
                     </div>
                 </div>
 
-                <div class="wrapper" [class.bg-black]="invert">
-                    <canvas *ngFor="let details of getStackedLayers" [id]="details.outputId" width="500" height="500"
-                        [style]="{opacity: details.opacity ?? '1'}" [class.d-none]="!details.visible || loading"
-                        [class.canvas-invert]="invert"></canvas>
+                <div class="wrapper" [class.bg-black]="invert" [style]="mapDetails.style">
+                    <canvas *ngFor="let details of getStackedLayers" [id]="details.outputId" [width]="mapDetails.width"
+                        [height]="mapDetails.height" [style]="{opacity: details.opacity ?? '1'}"
+                        [class.d-none]="!details.visible || loading" [class.canvas-invert]="invert"></canvas>
                 </div>
             </div>
         </div>

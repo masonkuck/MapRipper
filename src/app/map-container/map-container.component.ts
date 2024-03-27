@@ -16,12 +16,8 @@ export class MapContainerComponent implements OnInit, AfterViewInit {
   private readonly apiKey = Config.API_KEY;
   private loader = new Loader(this.apiKey);
 
-  mapDetails: MapDetailsType = {
-    latitude: 40.70782099171142,
-    longitude: -74.01146343775363,
-    zoom: 13,
-  };
-  $mapDetails = new BehaviorSubject<MapDetailsType>(this.mapDetails);
+  mapDetails: MapDetailsType | undefined;
+  $mapDetails = new BehaviorSubject<MapDetailsType>(this.loadDefaults(false));
 
   loading = true;
   hotReload = false;
@@ -76,27 +72,32 @@ export class MapContainerComponent implements OnInit, AfterViewInit {
     setTimeout(() => this.capture().then(() => this.loading = false), 1000);
   }
 
-  resetMap(details: MapDetailsType, refreshTargetMap: boolean = false) {
+  resetMap(details: MapDetailsType, refreshTargetMap: boolean = false, reloadMaps: boolean = false) {
     if (!this.targetMap) return;
 
-    const mapsToUpdate = [...this.mapObjects].map(map => map[1]);
-    if (refreshTargetMap)
-      mapsToUpdate.push(this.targetMap);
+    if (reloadMaps) {
+      this.loadMaps();
+    } else {
+      const mapsToUpdate = [...this.mapObjects].map(map => map[1]);
+      if (refreshTargetMap)
+        mapsToUpdate.push(this.targetMap);
 
-    mapsToUpdate.forEach(map => {
-      map.setCenter({ lat: details.latitude, lng: details.longitude });
-      map.setZoom(details.zoom);
-    });
+      mapsToUpdate.forEach(map => {
+        map.setCenter({ lat: details.latitude, lng: details.longitude });
+        map.setZoom(details.zoom);
+      });
 
-    if (refreshTargetMap)
-      this.$mapDetails.next(details);
+      if (refreshTargetMap) {
+        this.$mapDetails.next(details);
+      }
+    }
 
     this.storeCachePayload();
   }
 
   async loadMap(mapDivId: string) {
-    let mapDiv = document.getElementById(mapDivId);
-    if (!mapDiv) return;
+    const mapDiv = document.getElementById(mapDivId);
+    if (!mapDiv || !this.mapDetails) return;
 
     const google = await this.loader.load();
     const styles = this.layerDetails.find(x => x.divId === mapDivId)?.styles;
@@ -118,6 +119,8 @@ export class MapContainerComponent implements OnInit, AfterViewInit {
 
     const map = new google.maps.Map(mapDiv, options);
     map.changed = (x) => {
+      if (!this.mapDetails) throw new Error("Map details not set");
+
       const latitude = map.getCenter().lat();
       const longitude = map.getCenter().lng();
       const zoom = map.getZoom();
@@ -173,8 +176,8 @@ export class MapContainerComponent implements OnInit, AfterViewInit {
     const html2canvasOptions = {
       allowTaint: true,
       useCORS: true,
-      height: 500,
-      width: 500,
+      height: this.mapDetails?.height ?? 500,
+      width: this.mapDetails?.width ?? 500,
       scale: 1
     } as Options;
     const promises = this.layerDetails.map(async details => {
@@ -235,7 +238,7 @@ export class MapContainerComponent implements OnInit, AfterViewInit {
 
     const details = JSON.parse(cache) as CachePayload;
 
-    this.mapDetails = details.mapDetails;
+    this.mapDetails = new MapDetailsType(details.mapDetails);
     this.invert = details.invert;
     this.hotReload = details.hotReload;
     this.layerDetails.forEach(layer => {
@@ -249,7 +252,7 @@ export class MapContainerComponent implements OnInit, AfterViewInit {
 
   public storeCachePayload() {
     const cache: CachePayload = {
-      mapDetails: this.mapDetails,
+      mapDetails: this.mapDetails!,
       invert: this.invert,
       hotReload: this.hotReload,
       layerDetails: this.layerDetails.map(x => {
@@ -265,14 +268,10 @@ export class MapContainerComponent implements OnInit, AfterViewInit {
   }
 
   public loadDefaults(saveCache: boolean = false) {
-    this.mapDetails = {
-      latitude: 40.70782099171142,
-      longitude: -74.01146343775363,
-      zoom: 13,
-    };
+    this.mapDetails = new MapDetailsType();
     this.invert = false;
     this.hotReload = false;
-    this.layerDetails.forEach(layer => {
+    this.layerDetails?.forEach(layer => {
       layer.visible = true;
       layer.colorHex = layer.defaultColorHex;
     });
@@ -282,14 +281,36 @@ export class MapContainerComponent implements OnInit, AfterViewInit {
       this.loadMaps();
     }
 
+    return this.mapDetails;
+
   }
 
 }
 
-type MapDetailsType = {
-  latitude: number;
-  longitude: number;
-  zoom: number;
+class MapDetailsType {
+  constructor(clone?: MapDetailsType) {
+    if (!clone) return;
+
+    this.latitude = clone.latitude;
+    this.longitude = clone.longitude;
+    this.zoom = clone.zoom;
+    this.width = clone.width;
+    this.height = clone.height;
+  }
+
+  latitude: number = 40.70782099171142;
+  longitude: number = -74.01146343775363;
+  zoom: number = 13;
+  width: number = 500;
+  height: number = 500;
+
+  get style() {
+    return {
+      width: this.width + "px",
+      height: this.height + "px"
+    }
+  }
+
 }
 
 class LayerDetails implements ILayerDetails {
