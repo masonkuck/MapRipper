@@ -5,26 +5,38 @@
     border: 1px solid #ccc;
 }
 
-.wrapper canvas,.wrapper div {
+.wrapper canvas,
+.wrapper div {
     position: absolute;
     top: 0;
     left: 0;
 }
 
-    .layer-map {
-        border: 1px solid #ccc;
-        width: 500px;
-        height: 500px;
-        margin-right: auto;
-        margin-left: auto;
-    }
+.layer-map {
+    border: 1px solid #ccc;
+    width: 500px;
+    height: 500px;
+    margin-right: auto;
+    margin-left: auto;
+}
 
-input[type=color]{
+input[type=color] {
     width: 50%;
 }
 
 
-.canvas-invert{
+.canvas-invert {
     filter: invert(100%);
 }
 
+.h-50 {
+    max-height: 50vh;
+}
+
+.h-40 {
+    max-height: 40vh;
+}
+
+.layer-scroll {
+    overflow-y: scroll;
+}

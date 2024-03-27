@@ -164,9 +164,9 @@ export class MapContainerComponent implements OnInit, AfterViewInit {
     const blobs = await Promise.all(promises as Promise<blobPromise>[]);
     blobs.forEach(x => zip.file(x.name + ".png", x.file));
 
-    await zip.generateAsync({ type: 'blob' }).then(function (content) {
-      FileSaver.saveAs(content, 'layers.zip');
-    });
+    await zip.generateAsync({ type: 'blob' }).then(content =>
+      FileSaver.saveAs(content, 'layers.zip')
+    );
   }
 
   private async capture() {
