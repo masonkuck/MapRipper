@@ -1,17 +1,13 @@
 <div class="container-fluid" *ngIf="!!mapDetails">
     <div class="row">
-        <div class="col"></div>
-        <div class="col mt-2">
-            <div class="w-100 d-flex align-items-center  justify-content-between">
-                <button class="btn btn-secondary" (click)="loadDefaults(true)">Reset to Default</button>
-                <button class="btn btn-secondary" (click)="loadMaps()" title="Sometimes needed if the maps disapear">
-                    Reload Maps</button>
-                <button class="btn btn-primary" (click)="renderCapture()"> Load Preview</button>
+        <div class="col d-flex justify-content-center my-2">
+            <button class="btn btn-secondary" (click)="loadDefaults(true)">Reset to Default</button>
+            <button class="btn btn-secondary mx-2" (click)="loadMaps()" title="Sometimes needed if the maps disapear">
+                Reload Maps</button>
+            <button class="btn btn-primary me-2" (click)="renderCapture()"> Load Preview</button>
 
-                <button class="btn btn-primary" (click)="downloadLayers()"> Download Layers</button>
-            </div>
+            <button class="btn btn-primary" (click)="downloadLayers()"> Download Layers</button>
         </div>
-        <div class="col"></div>
     </div>
     <div class="row">
         <div class="col-md">
