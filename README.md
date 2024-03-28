@@ -6,8 +6,7 @@ I needed high quality SVG files of seperated map layers so that I can make perso
 
 ## TODO List
 - Address navigation (Find your house or city easier)
-- More layers, with more refined styles. Currenty the Parks layer has some labels still sticking around.
-- Aspect Ratios and Size options
+- Implement an SVG generator like https://github.com/tooolbox/node-potrace
 
 ## Acknowledgements / Thanks 😄
 Thanks to Will Herrmann (https://github.com/willherr) for the encouragement, suggestions, and technical help.
